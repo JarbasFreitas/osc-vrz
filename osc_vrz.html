@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#C00000">
+<title>OSC — VRZ Blindagens</title>
+<style>
+:root {
+  --red: #C00000;
+  --red-dark: #8B0000;
+  --red-light: #FFEBEB;
+  --red-mid: #F7C1C1;
+  --bg: #F5F5F5;
+  --bg-card: #FFFFFF;
+  --bg-input: #F8F8F8;
+  --text: #1A1A1A;
+  --text2: #555;
+  --text3: #888;
+  --border: #E0E0E0;
+  --green: #1A7A3F;
+  --green-bg: #E8F5EE;
+  --amber: #8B5E00;
+  --amber-bg: #FFF3DC;
+  --blue: #1A4E8B;
+  --blue-bg: #E8F0FF;
+  --gray-bg: #F0F0F0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --nav-h: 64px;
+  --header-h: 60px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111;
+    --bg-card: #1E1E1E;
+    --bg-input: #2A2A2A;
+    --text: #F0F0F0;
+    --text2: #AAA;
+    --text3: #777;
+    --border: #333;
+    --red-light: #3A0000;
+    --red-mid: #5A0000;
+    --green-bg: #0A2A1A;
+    --amber-bg: #2A1E00;
+    --blue-bg: #0A1A3A;
+    --gray-bg: #2A2A2A;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; }
+
+/* HEADER */
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--header-h);
+  background: var(--red);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.header-logo-dot { width: 8px; height: 8px; background: white; border-radius: 50%; opacity: 0.7; }
+.header-title { color: white; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+.header-sub { color: rgba(255,255,255,0.7); font-size: 11px; }
+.profile-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 5px 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex; align-items: center; gap: 5px;
+}
+.profile-btn svg { opacity: 0.8; }
+
+/* CONTENT */
+.content { padding-top: var(--header-h); padding-bottom: calc(var(--nav-h) + 12px); min-height: 100vh; }
+.screen { display: none; padding: 0 0 8px; }
+.screen.active { display: block; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h);
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; padding: 8px 4px; color: var(--text3); font-size: 10px; font-weight: 500;
+  transition: color 0.15s;
+  position: relative;
+}
+.nav-item.active { color: var(--red); }
+.nav-item svg { width: 22px; height: 22px; }
+.nav-badge {
+  position: absolute; top: 6px; right: calc(50% - 16px);
+  background: var(--red); color: white; font-size: 10px; font-weight: 600;
+  min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+
+/* SECTION HEADER */
+.section-header { padding: 16px 16px 8px; display: flex; align-items: center; justify-content: space-between; }
+.section-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.section-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.btn-primary {
+  background: var(--red); color: white; border-radius: 10px;
+  padding: 10px 18px; font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px; transition: opacity 0.15s;
+}
+.btn-primary:active { opacity: 0.85; }
+.btn-primary-full {
+  background: var(--red); color: white; border-radius: 12px;
+  padding: 14px; font-size: 15px; font-weight: 600; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 8px; transition: opacity 0.15s;
+}
+.btn-primary-full:active { opacity: 0.85; }
+.btn-secondary-full {
+  background: var(--gray-bg); color: var(--text); border-radius: 12px;
+  padding: 14px; font-size: 15px; font-weight: 500; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 8px; border: 1px solid var(--border);
+}
+
+/* CARDS */
+.card {
+  background: var(--bg-card); border-radius: 14px; margin: 0 16px 10px;
+  overflow: hidden; box-shadow: var(--shadow);
+}
+.card-inner { padding: 14px 16px; }
+
+/* STATUS BADGES */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px;
+  white-space: nowrap;
+}
+.badge-pending { background: var(--amber-bg); color: var(--amber); }
+.badge-approved { background: var(--green-bg); color: var(--green); }
+.badge-executed { background: var(--blue-bg); color: var(--blue); }
+.badge-nf { background: #F0E8FF; color: #6B21A8; }
+.badge-paid { background: var(--gray-bg); color: var(--text3); }
+.badge-refused { background: var(--red-light); color: var(--red); }
+
+/* OSC CARD */
+.osc-card { background: var(--bg-card); border-radius: 14px; margin: 0 16px 10px; overflow: hidden; box-shadow: var(--shadow); }
+.osc-card-header { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); }
+.osc-num { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.5px; }
+.osc-service { font-size: 15px; font-weight: 600; color: var(--text); margin-top: 1px; }
+.osc-card-body { padding: 12px 16px; }
+.osc-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.osc-row:last-child { margin-bottom: 0; }
+.osc-label { font-size: 12px; color: var(--text3); }
+.osc-value { font-size: 13px; font-weight: 500; color: var(--text); text-align: right; max-width: 60%; }
+.osc-valor { font-size: 16px; font-weight: 700; color: var(--text); }
+.osc-card-footer { padding: 10px 16px 12px; display: flex; gap: 8px; border-top: 1px solid var(--border); }
+.btn-action {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 5px; transition: opacity 0.15s;
+}
+.btn-action:active { opacity: 0.8; }
+.btn-approve { background: var(--green-bg); color: var(--green); }
+.btn-refuse { background: var(--red-light); color: var(--red); }
+.btn-confirm { background: var(--blue-bg); color: var(--blue); }
+.btn-nf { background: #F0E8FF; color: #6B21A8; }
+
+/* FORM */
+.form-section { padding: 0 16px; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: 0.4px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%; background: var(--bg-input); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 12px 14px; font-size: 15px; color: var(--text);
+  font-family: inherit; outline: none; transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+.form-textarea { resize: none; height: 80px; }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* STAT CARDS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 4px; }
+.stat-card { background: var(--bg-card); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+.stat-num { font-size: 24px; font-weight: 700; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.stat-red .stat-num { color: var(--red); }
+.stat-green .stat-num { color: var(--green); }
+.stat-amber .stat-num { color: var(--amber); }
+.stat-blue .stat-num { color: var(--blue); }
+
+/* ALERT CARD */
+.alert-card {
+  background: var(--amber-bg); border-radius: 14px; margin: 0 16px 10px;
+  padding: 12px 16px; border-left: 4px solid #D4830A;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--amber); }
+.alert-text { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 4px 16px; }
+.empty-state { text-align: center; padding: 40px 24px; color: var(--text3); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+.empty-text { font-size: 14px; }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.5); align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card); border-radius: 20px 20px 0 0;
+  padding: 20px 20px 36px; width: 100%; max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+
+/* PROFILE MODAL */
+.profile-option {
+  display: flex; align-items: center; gap: 14px; padding: 14px 0;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+}
+.profile-option:last-child { border-bottom: none; }
+.profile-avatar {
+  width: 42px; height: 42px; border-radius: 21px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.profile-name { font-size: 15px; font-weight: 600; }
+.profile-role { font-size: 12px; color: var(--text3); }
+.profile-check { margin-left: auto; color: var(--green); font-size: 18px; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #1A1A1A; color: white; padding: 10px 18px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; z-index: 300; opacity: 0;
+  transition: opacity 0.2s; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* TIMELINE */
+.timeline { padding: 8px 0; }
+.timeline-item { display: flex; gap: 12px; padding: 6px 0; }
+.timeline-dot { width: 10px; height: 10px; border-radius: 5px; background: var(--border); flex-shrink: 0; margin-top: 4px; }
+.timeline-dot.done { background: var(--green); }
+.timeline-dot.active { background: var(--red); }
+.timeline-text { font-size: 13px; color: var(--text2); }
+.timeline-date { font-size: 11px; color: var(--text3); }
+
+/* FILTER TABS */
+.filter-tabs { display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto; scrollbar-width: none; }
+.filter-tabs::-webkit-scrollbar { display: none; }
+.filter-tab {
+  white-space: nowrap; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;
+  background: var(--gray-bg); color: var(--text3); border: 1px solid var(--border); transition: all 0.15s;
+}
+.filter-tab.active { background: var(--red); color: white; border-color: var(--red); }
+
+/* INFO ROW */
+.info-pill { background: var(--blue-bg); color: var(--blue); border-radius: 8px; padding: 8px 12px; font-size: 12px; margin: 0 16px 10px; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-logo">
+    <div class="header-logo-dot"></div>
+    <div>
+      <div class="header-title">OSC — VRZ</div>
+      <div class="header-sub">Ordem de Serviço de Compra</div>
+    </div>
+  </div>
+  <button class="profile-btn" onclick="openProfileModal()">
+    <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="white" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+    <span id="profile-btn-text">Josmar</span>
+  </button>
+</header>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- SCREEN: HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="section-header">
+      <div>
+        <div class="section-title" id="home-greeting">Olá, Josmar</div>
+        <div class="section-sub" id="home-date"></div>
+      </div>
+    </div>
+
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div id="alerts-container"></div>
+
+    <div class="section-header" style="padding-top:8px">
+      <div class="section-title" style="font-size:15px">Recentes</div>
+    </div>
+    <div id="home-recent"></div>
+  </div>
+
+  <!-- SCREEN: NOVA OSC -->
+  <div class="screen" id="screen-nova">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Nova OSC</div>
+        <div class="section-sub">Preencha os dados do serviço</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-group">
+        <label class="form-label">Tipo de serviço</label>
+        <select class="form-select" id="f-tipo">
+          <option value="">Selecione...</option>
+          <option>Martelinho de Ouro</option>
+          <option>Eletricista Automotivo</option>
+          <option>Funilaria e Pintura</option>
+          <option>Tapeçaria / Estofamento</option>
+          <option>Alinhamento e Balanceamento</option>
+          <option>Vidraceiro</option>
+          <option>Chaveiro Automotivo</option>
+          <option>Limpeza Técnica</option>
+          <option>Mecânica Geral</option>
+          <option>Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prestador</label>
+        <select class="form-select" id="f-prestador">
+          <option value="">Selecione...</option>
+          <option>Martelinho Express SBC</option>
+          <option>Auto Elétrica Rápida</option>
+          <option>Pintura Perfeita Automotiva</option>
+          <option>Premium Tapeçaria</option>
+          <option>Centro Técnico ABC</option>
+          <option>Vidros & Cia</option>
+          <option>Silva Chaveiro Automotivo</option>
+          <option>Clean Pro Automotivos</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">OS do veículo</label>
+        <select class="form-select" id="f-os">
+          <option value="">Selecione a OS...</option>
+          <option>OS-1042 · Hilux SW4 2023 (BRB-4521)</option>
+          <option>OS-1038 · Volvo XC90 2022 (CDR-7823)</option>
+          <option>OS-1045 · Ranger 2024 (EFG-1234)</option>
+          <option>OS-1051 · Land Cruiser 2023 (HIJ-5678)</option>
+          <option>OS-1055 · Defender 2024 (KLM-9012)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Valor estimado</label>
+          <input class="form-input" id="f-valor" type="number" placeholder="R$ 0,00" inputmode="decimal">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Urgência</label>
+          <select class="form-select" id="f-urgencia">
+            <option value="normal">Normal</option>
+            <option value="urgente">Urgente</option>
+            <option value="critico">Crítico</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observações</label>
+        <textarea class="form-textarea" id="f-obs" placeholder="Descreva o problema ou serviço necessário..."></textarea>
+      </div>
+
+      <button class="btn-primary-full" onclick="salvarOSC()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Enviar para aprovação
+      </button>
+      <button class="btn-secondary-full" onclick="showScreen('home')">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- SCREEN: LISTA -->
+  <div class="screen" id="screen-lista">
+    <div class="section-header">
+      <div class="section-title">Minhas OSCs</div>
+    </div>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" onclick="filtrarOSC('todas', this)">Todas</button>
+      <button class="filter-tab" onclick="filtrarOSC('aguardando_aprovacao', this)">Aguardando</button>
+      <button class="filter-tab" onclick="filtrarOSC('aprovada', this)">Aprovadas</button>
+      <button class="filter-tab" onclick="filtrarOSC('executada', this)">Executadas</button>
+      <button class="filter-tab" onclick="filtrarOSC('nf_recebida', this)">NF Recebida</button>
+    </div>
+    <div id="lista-oscs"></div>
+  </div>
+
+  <!-- SCREEN: APROVAÇÃO -->
+  <div class="screen" id="screen-aprovacao">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Aprovação</div>
+        <div class="section-sub" id="aprovacao-sub">OSCs pendentes de aprovação</div>
+      </div>
+    </div>
+    <div id="aprovacao-list"></div>
+  </div>
+
+</div><!-- /content -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="showScreen('home')">
+    <svg fill="none" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 21V12h6v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Início
+  </button>
+  <button class="nav-item" id="nav-nova" onclick="showScreen('nova')">
+    <svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Nova OSC
+  </button>
+  <button class="nav-item" id="nav-lista" onclick="showScreen('lista')">
+    <svg fill="none" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    OSCs
+  </button>
+  <button class="nav-item" id="nav-aprovacao" onclick="showScreen('aprovacao')">
+    <svg fill="none" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Aprovação
+    <span class="nav-badge" id="badge-aprovacao" style="display:none">0</span>
+  </button>
+</nav>
+
+<!-- MODAL: PERFIL -->
+<div class="modal-overlay" id="modal-perfil" onclick="closeProfileModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Selecionar perfil</div>
+    <div id="profile-list"></div>
+  </div>
+</div>
+
+<!-- MODAL: NF -->
+<div class="modal-overlay" id="modal-nf" onclick="closeNFModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar nota fiscal</div>
+    <div class="form-group">
+      <label class="form-label">Número da NF</label>
+      <input class="form-input" id="nf-numero" type="text" placeholder="Ex: 001234">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor da NF</label>
+        <input class="form-input" id="nf-valor" type="number" placeholder="R$ 0,00" inputmode="decimal">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data de emissão</label>
+        <input class="form-input" id="nf-data" type="date">
+      </div>
+    </div>
+    <button class="btn-primary-full" onclick="salvarNF()">Confirmar NF</button>
+    <button class="btn-secondary-full" onclick="document.getElementById('modal-nf').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL: RECUSAR -->
+<div class="modal-overlay" id="modal-recusar" onclick="closeRecusarModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Recusar OSC</div>
+    <div class="form-group">
+      <label class="form-label">Motivo da recusa</label>
+      <textarea class="form-textarea" id="recusa-motivo" placeholder="Explique o motivo..."></textarea>
+    </div>
+    <button class="btn-primary-full" style="background:#C00000" onclick="confirmarRecusa()">Recusar OSC</button>
+    <button class="btn-secondary-full" onclick="document.getElementById('modal-recusar').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+const PERFIS = [
+  { id: 'josmar', nome: 'Josmar Silva', cargo: 'Líder de Produção', cor: '#1F4E78', inicial: 'JS' },
+  { id: 'eduardo', nome: 'Eduardo', cargo: 'Sócio / Aprovador', cor: '#C00000', inicial: 'ED' },
+  { id: 'financeiro', nome: 'Jarbas', cargo: 'Financeiro', cor: '#1A7A3F', inicial: 'JB' },
+];
+
+const ALCADAS = { josmar: 500, eduardo: 999999, financeiro: 999999 };
+
+let perfilAtivo = PERFIS[0];
+let filtroAtivo = 'todas';
+let oscParaNF = null;
+let oscParaRecusar = null;
+
+// Dados iniciais de exemplo
+const OSCS_INICIAIS = [
+  {
+    id: 'OSC-0001', tipo: 'Martelinho de Ouro', prestador: 'Martelinho Express SBC',
+    os: 'OS-1042 · Hilux SW4 2023', valorEstimado: 850, valorNF: null,
+    status: 'aguardando_aprovacao', urgencia: 'normal',
+    criadoPor: 'Josmar Silva', criadoEm: hoje(-2), aprovadoPor: null, aprovadoEm: null,
+    executadoEm: null, nfNumero: null, nfData: null, obs: 'Painel lateral amassado na desmontagem'
+  },
+  {
+    id: 'OSC-0002', tipo: 'Eletricista Automotivo', prestador: 'Auto Elétrica Rápida',
+    os: 'OS-1038 · Volvo XC90 2022', valorEstimado: 1200, valorNF: 1150,
+    status: 'nf_recebida', urgencia: 'urgente',
+    criadoPor: 'Josmar Silva', criadoEm: hoje(-8), aprovadoPor: 'Eduardo', aprovadoEm: hoje(-8),
+    executadoEm: hoje(-5), nfNumero: '004521', nfData: hoje(-2), obs: 'Chicote elétrico da porta danificado'
+  },
+  {
+    id: 'OSC-0003', tipo: 'Funilaria e Pintura', prestador: 'Pintura Perfeita Automotiva',
+    os: 'OS-1045 · Ranger 2024', valorEstimado: 2800, valorNF: null,
+    status: 'aprovada', urgencia: 'normal',
+    criadoPor: 'Josmar Silva', criadoEm: hoje(-3), aprovadoPor: 'Eduardo', aprovadoEm: hoje(-3),
+    executadoEm: null, nfNumero: null, nfData: null, obs: 'Para-choque traseiro trincado'
+  },
+  {
+    id: 'OSC-0004', tipo: 'Tapeçaria / Estofamento', prestador: 'Premium Tapeçaria',
+    os: 'OS-1051 · Land Cruiser 2023', valorEstimado: 650, valorNF: 650,
+    status: 'pago', urgencia: 'normal',
+    criadoPor: 'Josmar Silva', criadoEm: hoje(-15), aprovadoPor: 'Eduardo', aprovadoEm: hoje(-15),
+    executadoEm: hoje(-12), nfNumero: '001893', nfData: hoje(-10), obs: ''
+  },
+  {
+    id: 'OSC-0005', tipo: 'Vidraceiro', prestador: 'Vidros & Cia',
+    os: 'OS-1055 · Defender 2024', valorEstimado: 3500, valorNF: null,
+    status: 'aguardando_aprovacao', urgencia: 'critico',
+    criadoPor: 'Josmar Silva', criadoEm: hoje(0), aprovadoPor: null, aprovadoEm: null,
+    executadoEm: null, nfNumero: null, nfData: null, obs: 'Vidro dianteiro quebrou durante desmontagem — peça especial'
+  },
+];
+
+function hoje(dias = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + dias);
+  return d.toISOString().split('T')[0];
+}
+
+function loadOSCs() {
+  const raw = localStorage.getItem('vrz_osc_v1');
+  return raw ? JSON.parse(raw) : OSCS_INICIAIS;
+}
+
+function saveOSCs(oscs) {
+  localStorage.setItem('vrz_osc_v1', JSON.stringify(oscs));
+}
+
+function getOSCs() { return loadOSCs(); }
+
+// ==================== UI ====================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  renderScreen(name);
+  window.scrollTo(0, 0);
+}
+
+function renderScreen(name) {
+  if (name === 'home') renderHome();
+  if (name === 'lista') renderLista();
+  if (name === 'aprovacao') renderAprovacao();
+}
+
+function fmtData(str) {
+  if (!str) return '—';
+  const [y, m, d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fmtValor(v) {
+  if (!v && v !== 0) return '—';
+  return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+}
+
+function statusLabel(s) {
+  const map = {
+    aguardando_aprovacao: ['Aguardando aprovação', 'badge-pending'],
+    aprovada: ['Aprovada', 'badge-approved'],
+    recusada: ['Recusada', 'badge-refused'],
+    executada: ['Executado', 'badge-executed'],
+    nf_recebida: ['NF recebida', 'badge-nf'],
+    pago: ['Pago', 'badge-paid'],
+  };
+  return map[s] || [s, 'badge-paid'];
+}
+
+function urgenciaLabel(u) {
+  const map = { normal: '', urgente: '🟡 Urgente', critico: '🔴 Crítico' };
+  return map[u] || '';
+}
+
+// ==================== HOME ====================
+function renderHome() {
+  const oscs = getOSCs();
+  document.getElementById('home-greeting').textContent = `Olá, ${perfilAtivo.nome.split(' ')[0]}`;
+  document.getElementById('home-date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Stats
+  const pendentes = oscs.filter(o => o.status === 'aguardando_aprovacao').length;
+  const aprovadas = oscs.filter(o => o.status === 'aprovada').length;
+  const semNF = oscs.filter(o => o.status === 'executada').length;
+  const totalMes = oscs.filter(o => o.nfData && o.nfData.startsWith(new Date().toISOString().substring(0,7))).reduce((s, o) => s + (o.valorNF || o.valorEstimado), 0);
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card stat-amber"><div class="stat-num">${pendentes}</div><div class="stat-label">Aguardando aprovação</div></div>
+    <div class="stat-card stat-green"><div class="stat-num">${aprovadas}</div><div class="stat-label">Aprovadas em execução</div></div>
+    <div class="stat-card stat-red"><div class="stat-num">${semNF}</div><div class="stat-label">Executadas sem NF</div></div>
+    <div class="stat-card stat-blue"><div class="stat-num">${fmtValor(totalMes)}</div><div class="stat-label">NFs recebidas no mês</div></div>
+  `;
+
+  // Alertas
+  const alertas = [];
+  const executadasSemNF = oscs.filter(o => o.status === 'executada');
+  if (executadasSemNF.length > 0) {
+    alertas.push(`<div class="alert-card"><div class="alert-icon">⚠️</div><div><div class="alert-title">${executadasSemNF.length} OSC(s) executadas sem NF</div><div class="alert-text">Cobrar nota fiscal dos prestadores: ${executadasSemNF.map(o => o.prestador.split(' ')[0]).join(', ')}</div></div></div>`);
+  }
+  const criticos = oscs.filter(o => o.urgencia === 'critico' && o.status === 'aguardando_aprovacao');
+  if (criticos.length > 0) {
+    alertas.push(`<div class="alert-card" style="border-left-color:var(--red);background:var(--red-light)"><div class="alert-icon">🔴</div><div><div class="alert-title" style="color:var(--red)">${criticos.length} OSC(s) críticas aguardando aprovação</div><div class="alert-text">${criticos.map(o => o.os.split('·')[1]?.trim() || o.os).join(', ')}</div></div></div>`);
+  }
+  document.getElementById('alerts-container').innerHTML = alertas.join('');
+
+  // Recentes
+  const recentes = [...oscs].sort((a, b) => b.criadoEm.localeCompare(a.criadoEm)).slice(0, 4);
+  document.getElementById('home-recent').innerHTML = recentes.map(o => renderOSCCard(o, true)).join('') ||
+    '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhuma OSC ainda</div></div>';
+}
+
+// ==================== OSC CARD ====================
+function renderOSCCard(osc, compact = false) {
+  const [label, cls] = statusLabel(osc.status);
+  const urg = urgenciaLabel(osc.urgencia);
+  const acoes = getAcoes(osc);
+
+  return `
+  <div class="osc-card" onclick="handleCardClick('${osc.id}')">
+    <div class="osc-card-header">
+      <div>
+        <div class="osc-num">${osc.id} ${urg ? '· ' + urg : ''}</div>
+        <div class="osc-service">${osc.tipo}</div>
+      </div>
+      <span class="badge ${cls}">${label}</span>
+    </div>
+    <div class="osc-card-body">
+      <div class="osc-row">
+        <span class="osc-label">Prestador</span>
+        <span class="osc-value">${osc.prestador}</span>
+      </div>
+      <div class="osc-row">
+        <span class="osc-label">OS do veículo</span>
+        <span class="osc-value">${osc.os}</span>
+      </div>
+      <div class="osc-row">
+        <span class="osc-label">Valor estimado</span>
+        <span class="osc-valor">${fmtValor(osc.valorEstimado)}</span>
+      </div>
+      ${osc.valorNF ? `<div class="osc-row"><span class="osc-label">Valor NF</span><span class="osc-valor">${fmtValor(osc.valorNF)}</span></div>` : ''}
+      ${!compact ? `<div class="osc-row"><span class="osc-label">Criado em</span><span class="osc-value">${fmtData(osc.criadoEm)} · ${osc.criadoPor}</span></div>` : ''}
+      ${osc.obs ? `<div style="margin-top:6px;font-size:12px;color:var(--text3);font-style:italic">"${osc.obs}"</div>` : ''}
+    </div>
+    ${acoes.length > 0 ? `<div class="osc-card-footer">${acoes}</div>` : ''}
+  </div>`;
+}
+
+function getAcoes(osc) {
+  const acoes = [];
+  const p = perfilAtivo.id;
+
+  if (osc.status === 'aguardando_aprovacao' && (p === 'eduardo' || p === 'financeiro')) {
+    acoes.push(`<button class="btn-action btn-approve" onclick="event.stopPropagation();aprovarOSC('${osc.id}')">✓ Aprovar</button>`);
+    acoes.push(`<button class="btn-action btn-refuse" onclick="event.stopPropagation();abrirRecusar('${osc.id}')">✗ Recusar</button>`);
+  }
+  if (osc.status === 'aprovada' && p === 'josmar') {
+    acoes.push(`<button class="btn-action btn-confirm" onclick="event.stopPropagation();confirmarExecucao('${osc.id}')">✓ Confirmar execução</button>`);
+  }
+  if (osc.status === 'executada' && (p === 'financeiro' || p === 'josmar')) {
+    acoes.push(`<button class="btn-action btn-nf" onclick="event.stopPropagation();abrirNF('${osc.id}')">📄 Registrar NF</button>`);
+  }
+  if (osc.status === 'nf_recebida' && p === 'financeiro') {
+    acoes.push(`<button class="btn-action btn-approve" onclick="event.stopPropagation();marcarPago('${osc.id}')">✓ Marcar como pago</button>`);
+  }
+  return acoes.join('');
+}
+
+function handleCardClick(id) {
+  // future: open detail modal
+}
+
+// ==================== LISTA ====================
+function renderLista() {
+  const oscs = getOSCs();
+  const filtradas = filtroAtivo === 'todas' ? oscs : oscs.filter(o => o.status === filtroAtivo);
+  const sorted = [...filtradas].sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+
+  document.getElementById('lista-oscs').innerHTML = sorted.length > 0
+    ? sorted.map(o => renderOSCCard(o)).join('')
+    : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Nenhuma OSC nessa categoria</div></div>';
+}
+
+function filtrarOSC(filtro, btn) {
+  filtroAtivo = filtro;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderLista();
+}
+
+// ==================== APROVAÇÃO ====================
+function renderAprovacao() {
+  const oscs = getOSCs();
+  const pendentes = oscs.filter(o => o.status === 'aguardando_aprovacao');
+
+  document.getElementById('aprovacao-sub').textContent =
+    pendentes.length === 0 ? 'Nenhuma OSC pendente' : `${pendentes.length} OSC(s) aguardando aprovação`;
+
+  const sorted = [...pendentes].sort((a, b) => {
+    const urgOrd = { critico: 0, urgente: 1, normal: 2 };
+    return (urgOrd[a.urgencia] ?? 2) - (urgOrd[b.urgencia] ?? 2);
+  });
+
+  document.getElementById('aprovacao-list').innerHTML = sorted.length > 0
+    ? sorted.map(o => renderOSCCard(o)).join('')
+    : `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-text">Tudo aprovado! Nenhuma OSC pendente.</div></div>`;
+
+  // Badge
+  const badge = document.getElementById('badge-aprovacao');
+  if (pendentes.length > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = pendentes.length;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// ==================== ACTIONS ====================
+function salvarOSC() {
+  const tipo = document.getElementById('f-tipo').value;
+  const prestador = document.getElementById('f-prestador').value;
+  const os = document.getElementById('f-os').value;
+  const valor = parseFloat(document.getElementById('f-valor').value);
+  const urgencia = document.getElementById('f-urgencia').value;
+  const obs = document.getElementById('f-obs').value;
+
+  if (!tipo || !prestador || !os || !valor) {
+    showToast('Preencha todos os campos obrigatórios');
+    return;
+  }
+
+  const oscs = getOSCs();
+  const novoId = 'OSC-' + String(oscs.length + 1).padStart(4, '0');
+
+  oscs.unshift({
+    id: novoId, tipo, prestador, os, valorEstimado: valor, valorNF: null,
+    status: 'aguardando_aprovacao', urgencia,
+    criadoPor: perfilAtivo.nome, criadoEm: hoje(0),
+    aprovadoPor: null, aprovadoEm: null, executadoEm: null,
+    nfNumero: null, nfData: null, obs
+  });
+
+  saveOSCs(oscs);
+
+  // Reset form
+  ['f-tipo','f-prestador','f-os','f-valor','f-obs'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('f-urgencia').value = 'normal';
+
+  showToast(`${novoId} enviada para aprovação`);
+  updateBadge();
+  showScreen('home');
+}
+
+function aprovarOSC(id) {
+  const oscs = getOSCs();
+  const osc = oscs.find(o => o.id === id);
+  if (!osc) return;
+  osc.status = 'aprovada';
+  osc.aprovadoPor = perfilAtivo.nome;
+  osc.aprovadoEm = hoje(0);
+  saveOSCs(oscs);
+  showToast(`${id} aprovada!`);
+  updateBadge();
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+}
+
+function abrirRecusar(id) {
+  oscParaRecusar = id;
+  document.getElementById('recusa-motivo').value = '';
+  document.getElementById('modal-recusar').classList.add('open');
+}
+
+function confirmarRecusa() {
+  if (!oscParaRecusar) return;
+  const motivo = document.getElementById('recusa-motivo').value;
+  if (!motivo.trim()) { showToast('Informe o motivo da recusa'); return; }
+  const oscs = getOSCs();
+  const osc = oscs.find(o => o.id === oscParaRecusar);
+  if (osc) {
+    osc.status = 'recusada';
+    osc.obs = (osc.obs ? osc.obs + ' | ' : '') + 'Recusada: ' + motivo;
+    saveOSCs(oscs);
+    showToast(`${oscParaRecusar} recusada`);
+    updateBadge();
+  }
+  document.getElementById('modal-recusar').classList.remove('open');
+  oscParaRecusar = null;
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+}
+
+function confirmarExecucao(id) {
+  const oscs = getOSCs();
+  const osc = oscs.find(o => o.id === id);
+  if (!osc) return;
+  osc.status = 'executada';
+  osc.executadoEm = hoje(0);
+  saveOSCs(oscs);
+  showToast(`Execução de ${id} confirmada`);
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+}
+
+function abrirNF(id) {
+  oscParaNF = id;
+  document.getElementById('nf-numero').value = '';
+  document.getElementById('nf-valor').value = '';
+  document.getElementById('nf-data').value = hoje(0);
+  document.getElementById('modal-nf').classList.add('open');
+}
+
+function salvarNF() {
+  if (!oscParaNF) return;
+  const numero = document.getElementById('nf-numero').value.trim();
+  const valor = parseFloat(document.getElementById('nf-valor').value);
+  const data = document.getElementById('nf-data').value;
+  if (!numero || !valor || !data) { showToast('Preencha todos os campos da NF'); return; }
+
+  const oscs = getOSCs();
+  const osc = oscs.find(o => o.id === oscParaNF);
+  if (osc) {
+    osc.status = 'nf_recebida';
+    osc.nfNumero = numero;
+    osc.valorNF = valor;
+    osc.nfData = data;
+    saveOSCs(oscs);
+    showToast(`NF ${numero} vinculada à ${oscParaNF}`);
+  }
+  document.getElementById('modal-nf').classList.remove('open');
+  oscParaNF = null;
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+}
+
+function marcarPago(id) {
+  const oscs = getOSCs();
+  const osc = oscs.find(o => o.id === id);
+  if (!osc) return;
+  osc.status = 'pago';
+  saveOSCs(oscs);
+  showToast(`${id} marcada como paga`);
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+}
+
+// ==================== PROFILE ====================
+function openProfileModal() {
+  document.getElementById('profile-list').innerHTML = PERFIS.map(p => `
+    <div class="profile-option" onclick="trocarPerfil('${p.id}')">
+      <div class="profile-avatar" style="background:${p.cor}">${p.inicial}</div>
+      <div>
+        <div class="profile-name">${p.nome}</div>
+        <div class="profile-role">${p.cargo}</div>
+      </div>
+      ${p.id === perfilAtivo.id ? '<span class="profile-check">✓</span>' : ''}
+    </div>
+  `).join('');
+  document.getElementById('modal-perfil').classList.add('open');
+}
+
+function trocarPerfil(id) {
+  perfilAtivo = PERFIS.find(p => p.id === id);
+  document.getElementById('profile-btn-text').textContent = perfilAtivo.nome.split(' ')[0];
+  document.getElementById('modal-perfil').classList.remove('open');
+  updateBadge();
+  renderScreen(document.querySelector('.screen.active').id.replace('screen-', ''));
+  showToast(`Perfil: ${perfilAtivo.nome}`);
+}
+
+function closeProfileModal(e) {
+  if (e.target === e.currentTarget) document.getElementById('modal-perfil').classList.remove('open');
+}
+function closeNFModal(e) {
+  if (e.target === e.currentTarget) document.getElementById('modal-nf').classList.remove('open');
+}
+function closeRecusarModal(e) {
+  if (e.target === e.currentTarget) document.getElementById('modal-recusar').classList.remove('open');
+}
+
+// ==================== UTILS ====================
+function updateBadge() {
+  const pendentes = getOSCs().filter(o => o.status === 'aguardando_aprovacao').length;
+  const badge = document.getElementById('badge-aprovacao');
+  if (pendentes > 0) { badge.style.display = 'flex'; badge.textContent = pendentes; }
+  else { badge.style.display = 'none'; }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+  updateBadge();
+  renderHome();
+});
+</script>
+</body>
+</html>
